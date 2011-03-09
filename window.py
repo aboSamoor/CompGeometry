@@ -1,3 +1,4 @@
+#! /usr/bin/env python
 import pyglet
 import itertools
 
@@ -87,8 +88,8 @@ def drawVertices(points):
 
 def drawPolygons(polygons):
     for poly in polygons:
-        if len(poly) > 4:
-            pyglet.graphics.draw(len(poly)/2, pyglet.gl.GL_POLYGON,('v2i', poly))
+        if len(poly) > 2:
+            pyglet.graphics.draw(len(poly)/2, pyglet.gl.GL_LINE_LOOP,('v2i', poly))
         else:
             drawVertices(poly)
 
@@ -108,10 +109,8 @@ def drawLines(lines):
 def on_draw():
     global polygons, lines, vertices
     win.clear()
-#    pyglet.graphics.draw(len(vertices)/2, pyglet.gl.GL_POINTS,('v2i', vertices))
     drawVertices(vertices)
     drawPolygons(polygons)
-    
     drawLines(lines)
 #    pyglet.graphics.draw_indexed(4, pyglet.gl.GL_TRIANGLES, [0, 1, 2, 0, 2], ('v2i', (100, 100, 150, 100, 150, 150, 100, 150)))
     fps_display.draw()
