@@ -1,5 +1,4 @@
 #! /usr/bin/env python
-#                print ' '.join(map( lambda x: x[0].__str__(), stack))
 
 import sys, os
 import pdb
@@ -33,6 +32,17 @@ class Tree(object):
         else:
             parent.children.append(node)
             parent.children[-1].parent = parent
+
+    def isRoot(self, node):
+        if node.parent:
+            return False
+        return True
+
+    def isLeaf(self, node):
+        return node.children and filter(lambda x:x, node.children)
+    
+    def delete(self, node):
+        pass
 
     def progress(self, node, direction, constraint):
         if direction == Node.PARENT:
@@ -172,9 +182,6 @@ class BSTree(Tree):
     def hasChild(self, node, direction):
         return node and node.children[direction]
 
-    def isLeaf(self, node):
-        return node and node.children and filter(lambda x: x, x.children)
-    
     def __smallest(self, root):
             current = None
             for ptr in self.progress(root, Node.LEFT, lambda x: x):
@@ -187,10 +194,6 @@ class BSTree(Tree):
                 current = ptr
             return current
 
-    def isRoot(self, node):
-        if node.parent:
-            return False
-        return True
 
     def isRightChild(self, node):
         return node == node.parent.children[Node.RIGHT]         
@@ -238,11 +241,39 @@ class BSTree(Tree):
                     return current.parent.parent
             # we found that parent with right child
         return None        
-         
+        
+    def delete(self, node): 
+        if self.isLeaf(node):
+            if not self.isRoot(node):
+                node.parent[node.parent.children.index(node)] = None
+            else:
+                self.root = None
+        else:
+            succ = self.successor(node)
+            if succ:
+                    succ.children[Node.LEFT] = node.children[Node.LEFT]
+                    succ.parent[succ.parent.children.index(succ)] = succ.children[Node.RIGHT]
+                    succ.children[Node.RIGHT] = node.children[Node.RIGHT]
+                if isRoot(node):
+                    self.root = succ
+                else:
+                    node.parent[node.parent.children.index(node)] = succ
+            else:
+                pre = self.predecessor(node)
+                if pre:
+                    pre.children[Node.RIGHT] = node.children[Node.RIGHT]
+                    pre.parent[pre.parent.children.index(pre)] = pre.children[Node.LEFT]
+                    pre.children[Node.LEFT] = node.children[Node.LEFT]
+                    if isRoot(node):
+                        self.root = pre
+                    else:
+                        node.parent[node.parent.children.index(node)] = pre
+                else:
+                    print "An error happened, no succ or pre and still not a leaf", node
+            
             
 def RBTree(BSTree):
-    RED = 1
-    BLACK = 0
+    RED, BLACK = 1, 0
     def __init__(self, root, children = [None, None]):
         root.color = RBTree.BLACK 
         super(RBTree, self).__init__(root, children)
