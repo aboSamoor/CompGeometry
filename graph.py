@@ -2,6 +2,7 @@
 
 import sys, os
 import pdb
+import Queue
 
 class Node(object):
     LEFT, RIGHT, PARENT = 0, 1, 2
@@ -33,13 +34,8 @@ class Tree(object):
             parent.children.append(node)
             parent.children[-1].parent = parent
 
-    def isRoot(self, node):
-        if node.parent:
-            return False
-        return True
-
     def isLeaf(self, node):
-        return node.children and filter(lambda x:x, node.children)
+        return not reduce(lambda x,y: x or y, node.children)
     
     def delete(self, node):
         pass
@@ -84,6 +80,7 @@ class Tree(object):
                     yield current
 
     def inorder(self, start = None):
+#        pdb.set_trace()
         current = start if start else self.root
         stack = [(current, 0)]
         while len(stack):
@@ -104,7 +101,7 @@ class Tree(object):
     def breadthFS(self, start = None):
         current = start if start else self.root
         q = Queue.Queue()
-        q.put(curren)
+        q.put(current)
         while not q.empty():
             current = q.get()
             for child in current.children:
@@ -112,7 +109,9 @@ class Tree(object):
                 yield child
 
     def traverse(self, order):
-        if order == Tree.INORDER:
+        if not self.root:
+            yield None
+        elif order == Tree.INORDER:
             for node in self.inorder():
                 yield node
         elif order == Tree.PREORDER:
@@ -205,11 +204,10 @@ class BSTree(Tree):
         current = None
         if not node:
             return current
-
         if node.children[Node.RIGHT]: # right child exists, traverse the right subtree
             return self.__smallest(node.children[Node.RIGHT])
         else:
-            if self.isRoot(node): #root case
+            if node.isRoot(): #root case
                 return None
             if self.isLeftChild(node): # left child with no right subree
                 return node.parent
@@ -229,7 +227,7 @@ class BSTree(Tree):
         if node.children[Node.LEFT]: # left child exists, traverse the left subtree
             return self.__largest(node.children[Node.LEFT])
         else:
-            if self.isRoot(node): #root case
+            if node.isRoot(): #root case
                 return None
             if self.isRightChild(node): # left child with no right subree
                 return node.parent
@@ -240,34 +238,52 @@ class BSTree(Tree):
                 if current.parent.parent and self.isRightChild(current.parent):
                     return current.parent.parent
             # we found that parent with right child
-        return None        
-        
+        return None
+            
+    def updateParent(self, node, parent):
+        for child in filter(lambda x:x, node.children):
+                    child.parent = parent
+    
     def delete(self, node): 
         if self.isLeaf(node):
-            if not self.isRoot(node):
-                node.parent[node.parent.children.index(node)] = None
+            if not node.isRoot():
+                node.parent.children[node.parent.children.index(node)] = None
             else:
                 self.root = None
         else:
             succ = self.successor(node)
             if succ:
-                    succ.children[Node.LEFT] = node.children[Node.LEFT]
-                    succ.parent[succ.parent.children.index(succ)] = succ.children[Node.RIGHT]
-                    succ.children[Node.RIGHT] = node.children[Node.RIGHT]
-                if isRoot(node):
-                    self.root = succ
-                else:
-                    node.parent[node.parent.children.index(node)] = succ
+                    if succ.isRoot():
+                        succ.children[Node.LEFT] = node.children[Node.LEFT]
+                        self.updateParent(node, succ)
+                    else:
+                        succ.children[Node.LEFT] = node.children[Node.LEFT]
+                        succ.parent.children[succ.parent.children.index(succ)] = succ.children[Node.RIGHT]
+                        succ.children[Node.RIGHT] = node.children[Node.RIGHT]
+                        self.updateParent(node, succ)
+                        if node.isRoot():
+                            self.root = succ
+                            succ.parent = None
+                        else:
+                            node.parent.children[node.parent.children.index(node)] = succ
+                            succ.parent = node.parent
             else:
                 pre = self.predecessor(node)
                 if pre:
-                    pre.children[Node.RIGHT] = node.children[Node.RIGHT]
-                    pre.parent[pre.parent.children.index(pre)] = pre.children[Node.LEFT]
-                    pre.children[Node.LEFT] = node.children[Node.LEFT]
-                    if isRoot(node):
-                        self.root = pre
+                    if pre.isRoot():
+                        pre.children[Node.RIGHT] = node.children[Node.RIGHT]
+                        self.updateParent(node, pre)
                     else:
-                        node.parent[node.parent.children.index(node)] = pre
+                        pre.children[Node.RIGHT] = node.children[Node.RIGHT]
+                        pre.parent.children[pre.parent.children.index(pre)] = pre.children[Node.LEFT]
+                        pre.children[Node.LEFT] = node.children[Node.LEFT]
+                        self.updateParent(node, succ)
+                        if node.isRoot():
+                            self.root = pre
+                            pre.parent = None
+                        else:
+                            node.parent.children[node.parent.children.index(node)] = pre
+                            pre.parent = node.parent
                 else:
                     print "An error happened, no succ or pre and still not a leaf", node
             
@@ -301,14 +317,23 @@ if __name__ == "__main__":
     t.insert(a3)
     t.insert(a2)
     t.insert(a4)
-    t.insert(a52)
+    t.insert(a8)
     t.insert(a7)
     t.insert(a9)
 #    pdb.set_trace()
+#    print t
     print t
-    print t.toString(Tree.PREORDER)
-    print t.toString(Tree.POSTORDER)
-    suc = t.search(9)[0]
-    while suc:
-        suc = t.predecessor(suc)
-        print suc
+    t.delete(a5)
+    print t
+    t.delete(a7)
+    print t
+    t.delete(a3)
+    print t
+    t.delete(a8)
+    print t
+    t.delete(a4)
+    print t
+    t.delete(a2)
+    print t
+    t.delete(a9)
+    print t
