@@ -1,4 +1,5 @@
 #! /usr/bin/env python
+#                print ' '.join(map( lambda x: x[0].__str__(), stack))
 
 import sys, os
 import pdb
@@ -73,7 +74,6 @@ class Tree(object):
                     yield current
 
     def inorder(self, start = None):
-#        pdb.set_trace()
         current = start if start else self.root
         stack = [(current, 0)]
         while len(stack):
@@ -84,7 +84,6 @@ class Tree(object):
                 stack.append((current, processed +1))
                 for node in self.progress(current.children[processed], Node.LEFT, lambda x: x):
                     stack.append((node, 1)) 
-#                print ' '.join(map( lambda x: x[0].__str__(), stack))
                 current, processed = stack.pop()
 
     def preorder(self, start = None):
@@ -144,12 +143,14 @@ class BSTree(Tree):
                     current = current.children[Node.RIGHT]
                 else:
                     current.children[Node.RIGHT] = node
+                    node.parent = current
                     break
             else:
                 if current.children[Node.LEFT]:
                     current = current.children[Node.LEFT]
                 else:
                     current.children[Node.LEFT] = node
+                    node.parent = current
                     break
         
     def search(self, key):
@@ -168,26 +169,77 @@ class BSTree(Tree):
         return res
    
 
-    def __leftChild(self, node):
-        return node and node.parent and node == node.parent.children[Node.LEFT]
-    
     def hasChild(self, node, direction):
         return node and node.children[direction]
 
-    def successor(self, node):
-            pdb.set_trace()
-            if not node:
-                 return node
-            current = node
-            if current.children[Node.RIGHT]:
-                current = node.children[Node.RIGHT]
-            else:
-                for node in self.progress(node, Node.PARENT, lambda x : not self.hasChild(x, Node.RIGHT)):
-                    current = node
-            for node in self.progress(current, Node.LEFT, lambda x :x):
-                current = node
+    def isLeaf(self, node):
+        return node and node.children and filter(lambda x: x, x.children)
+    
+    def __smallest(self, root):
+            current = None
+            for ptr in self.progress(root, Node.LEFT, lambda x: x):
+                current = ptr
             return current
-                 
+    
+    def __largest(self, root):
+            current = None
+            for ptr in self.progress(root, Node.RIGHT, lambda x: x):
+                current = ptr
+            return current
+
+    def isRoot(self, node):
+        if node.parent:
+            return False
+        return True
+
+    def isRightChild(self, node):
+        return node == node.parent.children[Node.RIGHT]         
+
+    def isLeftChild(self, node):
+        return node == node.parent.children[Node.LEFT]         
+
+    def successor(self, node):
+        current = None
+        if not node:
+            return current
+
+        if node.children[Node.RIGHT]: # right child exists, traverse the right subtree
+            return self.__smallest(node.children[Node.RIGHT])
+        else:
+            if self.isRoot(node): #root case
+                return None
+            if self.isLeftChild(node): # left child with no right subree
+                return node.parent
+            #otherwise, traverse up till you find a parent with right subtree
+            for ptr in self.progress(node, Node.PARENT, lambda x : x.parent and self.isRightChild(x)):
+                current = ptr
+            if current.parent:
+                if current.parent.parent and self.isLeftChild(current.parent):
+                    return current.parent.parent
+            # we found that parent with right child
+        return None
+
+    def predecessor(self, node):
+        current = None
+        if not node:
+            return current 
+        if node.children[Node.LEFT]: # left child exists, traverse the left subtree
+            return self.__largest(node.children[Node.LEFT])
+        else:
+            if self.isRoot(node): #root case
+                return None
+            if self.isRightChild(node): # left child with no right subree
+                return node.parent
+            #otherwise, traverse up till you find a parent with right subtree
+            for ptr in self.progress(node, Node.PARENT, lambda x : x.parent and self.isLeftChild(x)):
+                current = ptr
+            if current.parent:
+                if current.parent.parent and self.isRightChild(current.parent):
+                    return current.parent.parent
+            # we found that parent with right child
+        return None        
+         
+            
 def RBTree(BSTree):
     RED = 1
     BLACK = 0
@@ -225,8 +277,7 @@ if __name__ == "__main__":
     print t
     print t.toString(Tree.PREORDER)
     print t.toString(Tree.POSTORDER)
-    c = t.search(2)[0]
-    d = t.successor(c)
-    print d
-    c = t.successor(d)
-    print c
+    suc = t.search(9)[0]
+    while suc:
+        suc = t.predecessor(suc)
+        print suc
