@@ -176,7 +176,6 @@ class BSTree(Tree):
                     current = current.children[Node.RIGHT]
                 break
         return res
-   
 
     def hasChild(self, node, direction):
         return node and node.children[direction]
@@ -192,7 +191,6 @@ class BSTree(Tree):
             for ptr in self.progress(root, Node.RIGHT, lambda x: x):
                 current = ptr
             return current
-
 
     def isRightChild(self, node):
         return node == node.parent.children[Node.RIGHT]         
@@ -239,11 +237,11 @@ class BSTree(Tree):
                     return current.parent.parent
             # we found that parent with right child
         return None
-            
+
     def updateParent(self, node, parent):
         for child in filter(lambda x:x, node.children):
                     child.parent = parent
-    
+
     def delete(self, node): 
         if self.isLeaf(node):
             if not node.isRoot():
@@ -286,9 +284,9 @@ class BSTree(Tree):
                             pre.parent = node.parent
                 else:
                     print "An error happened, no succ or pre and still not a leaf", node
+
             
-            
-def RBTree(BSTree):
+class RBTree(BSTree):
     RED, BLACK = 1, 0
     def __init__(self, root, children = [None, None]):
         root.color = RBTree.BLACK 
@@ -300,6 +298,94 @@ def RBTree(BSTree):
     def delete(self, node):
         pass
 
+
+
+class Heap(Tree):
+    def __init__(self):
+        super(Heap, self).__init__()
+        self.nodes = []
+    def __parent(self, pos):
+        parent = (pos-1)/2 if (pos-1)/2 != -1 else None
+        return parent
+    def __leftChild(self, pos):
+        left = 2*pos + 1 if 2*pos+1 < len(self.nodes) else None
+        return left
+    def __rightChild(self, pos):
+        right = 2*pos + 2 if 2*pos+2 < len(self.nodes) else None
+        return right
+    def __updatePtrs(self, pos):
+        if pos == None:
+            return 0
+        left = self.__leftChild(pos)
+        right = self.__rightChild(pos)
+        parent = self.__parent(pos)
+        if left!= None:
+            self.nodes[pos].children[BSTree.LEFT] = self.nodes[left]
+            self.nodes[left].parent = self.nodes[pos]
+        else:
+            self.nodes[pos].children[BSTree.LEFT] = None
+            
+        if right!= None:
+            self.nodes[pos].children[BSTree.RIGHT] = self.nodes[right]
+            self.nodes[right].parent = self.nodes[pos]
+        else:
+            self.nodes[pos].children[BSTree.RIGHT] = None
+        
+        if parent != None:
+            self.nodes[pos].parent = self.nodes[parent]
+            if self.__leftChild(parent) == pos:
+                self.nodes[parent].children[BSTree.LEFT] = self.nodes[pos]
+            elif self.__rightChild(parent) == pos:
+                self.nodes[parent].children[BSTree.RIGHT] = self.nodes[pos]
+        else:
+            self.nodes[pos].parent = None
+
+    def __swap(self, pos, pos2):
+        self.nodes[pos], self.nodes[pos2] = self.nodes[pos2], self.nodes[pos]
+        self.__updatePtrs(pos)
+        self.__updatePtrs(pos2)
+        if pos*pos2 == 0:
+            self.root = self.nodes[0]
+        
+    def __bubbleUp(self):
+        pos = len(self.nodes) - 1
+        parent = self.__parent(pos)
+        while  parent != None and self.nodes[pos].key < self.nodes[parent].key:
+            self.__swap(pos, self.__parent(pos))
+            pos = parent
+            parent = self.__parent(pos)
+    def __isLeaf(self, pos):
+        return self.__leftChild(pos)== None and self.__rightChild(pos)== None
+    
+    def __bubbleDown(self):
+        pos = 0
+        while not self.isLeaf(pos):
+            left = self.leftChild(pos)
+            right = self.rightChild(pos)
+            if left != None and self.nodes[left].key < self.nodes[pos].key:
+                 self.__swap(pos, left)
+                 pos = left
+            elif right != None and self.nodes[right] < self.nodes[pos]:
+                 self.__swap(pos, right)
+                 pos = right
+
+    def insert(self,node):
+        self.nodes.append(node)
+        self.__updatePtrs(len(self.nodes) -1)
+        self.__updatePtrs(self.__parent(len(self.nodes)-1))
+        if not self.root:
+            self.root = self.nodes[0]
+        self.__bubbleUp()
+    def __delete(self):
+        del self.nodes[-1]
+        
+    def extract_min(self):
+        self.__swap(0, len(self.nodes)-1)
+        self.__delete()
+        self.__bubbleDown()
+    def merge(self, heap2):
+        pass
+    
 if __name__ == "__main__":
     a1 = Node(1,[None, None])
     a2 = Node(2,[None, None])
@@ -312,7 +398,7 @@ if __name__ == "__main__":
     a8 = Node(8,[None, None])
     a9 = Node(9,[None, None])
     
-    t = BSTree()
+    t = Heap()
     t.insert(a5)
     t.insert(a3)
     t.insert(a2)
