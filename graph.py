@@ -359,15 +359,17 @@ class Heap(Tree):
     
     def __bubbleDown(self):
         pos = 0
-        while not self.isLeaf(pos):
-            left = self.leftChild(pos)
-            right = self.rightChild(pos)
-            if left != None and self.nodes[left].key < self.nodes[pos].key:
-                 self.__swap(pos, left)
-                 pos = left
-            elif right != None and self.nodes[right] < self.nodes[pos]:
-                 self.__swap(pos, right)
-                 pos = right
+        lastPos = -1
+        while not self.isLeaf(self.nodes[pos]) and lastPos != pos:
+            left = self.__leftChild(pos)
+            right = self.__rightChild(pos)
+            lastPos = pos
+            poss = filter(lambda x: x, [left, right])
+            keys = map(lambda x: (self.nodes[x].key, x), poss)
+            minKey, minPos = min(keys) if keys else (None, None)
+            if minPos != None and self.nodes[minPos].key < self.nodes[pos].key:
+                self.__swap(pos, minPos)
+                pos = minPos
 
     def insert(self,node):
         self.nodes.append(node)
@@ -377,12 +379,21 @@ class Heap(Tree):
             self.root = self.nodes[0]
         self.__bubbleUp()
     def __delete(self):
-        del self.nodes[-1]
+        end = len(self.nodes)-1
+        del self.nodes[end]
+        if len(self.nodes) ==0:
+            self.root = None
+        self.__updatePtrs(self.__parent(end))
         
     def extract_min(self):
+        if len(self.nodes) == 0:
+            return None
+        res = self.nodes[0]
         self.__swap(0, len(self.nodes)-1)
         self.__delete()
-        self.__bubbleDown()
+        if len(self.nodes):
+            self.__bubbleDown()
+        return res
     def merge(self, heap2):
         pass
     
@@ -409,17 +420,17 @@ if __name__ == "__main__":
 #    pdb.set_trace()
 #    print t
     print t
-    t.delete(a5)
+    print t.extract_min()
     print t
-    t.delete(a7)
+    print t.extract_min()
     print t
-    t.delete(a3)
+    print t.extract_min()
     print t
-    t.delete(a8)
+    print t.extract_min()
     print t
-    t.delete(a4)
+    print t.extract_min()
     print t
-    t.delete(a2)
+    print t.extract_min()
     print t
-    t.delete(a9)
+    print t.extract_min()
     print t
