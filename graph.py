@@ -26,7 +26,8 @@ class Tree(object):
         self.root = root
         if self.root:
             self.root.children = children
-
+    def empty(self):
+        return self.root == None
     def insert(self, parent, node):
         if not self.root:
             self.root = node
@@ -240,8 +241,8 @@ class BSTree(Tree):
 
     def updateParent(self, node, parent):
         for child in filter(lambda x:x, node.children):
-                    child.parent = parent
-
+            child.parent = parent
+    
     def delete(self, node): 
         if self.isLeaf(node):
             if not node.isRoot():
@@ -394,6 +395,13 @@ class Heap(Tree):
         if len(self.nodes):
             self.__bubbleDown()
         return res
+    def extract_next(self):
+        return extract_min()
+    def min(self):
+        if not self.empty():
+            return self.nodes[0]
+    def next(self):
+        return self.min()
     def merge(self, heap2):
         pass
     
