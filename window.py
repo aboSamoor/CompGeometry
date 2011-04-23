@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 import pyglet
 import itertools
-
+import graph 
 
 win = pyglet.window.Window()
 label = pyglet.text.Label('Rami Eid')
@@ -14,6 +14,8 @@ fps_display = pyglet.clock.ClockDisplay()
 run = False
 mode = "vertex"
 
+EQ = ""
+
 def updatePts(points, opX, opY):
     for i in range(0,2*(len(points)/2),2):
         points[i] = opX(points[i])
@@ -21,7 +23,7 @@ def updatePts(points, opX, opY):
 
 @win.event
 def on_mouse_press(x, y, button, modifiers):
-    global vertices, polygons, lines
+    global vertices, polygons, lines, EQ
     if button == pyglet.window.mouse.LEFT:
         if mode == "polygon":
             polygons[-1].append(x)
@@ -29,10 +31,21 @@ def on_mouse_press(x, y, button, modifiers):
         elif mode == "vertex":
             vertices.append(x)
             vertices.append(y)
+            node = graph.Node(x , children= [None, None], data = (x,y))
+            if len(vertices) == 2:
+                EQ = graph.BST(node) 
+            else:
+                EQ.insert(node)
+            print "\n\ninorder sorted points"
+            print EQ.toString(graph.Tree.INORDER) 
+            print "\npreorder sorted points"
+            print EQ.toString(graph.Tree.PREORDER) 
+            print "\nThe actual points"
+            for i in xrange(0,len(vertices), 2):
+                print vertices[i],
         elif mode == "line":
             lines.append(x)
             lines.append(y)
-    print x, y, button, modifiers
 
 @win.event
 def on_key_press(symbol, modifiers):
