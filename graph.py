@@ -6,13 +6,13 @@ import Queue
 
 class Node(object):
     LEFT, RIGHT, PARENT = 0, 1, 2
-    def __init__(self, key, children = [], data= None, parent = None, color= None):
+    def __init__(self, key, children = [], data = None, parent = None, color = None):
         self.data = data
         self.key = key
         self.children = children
         self.parent = parent
         self.color = color
-    
+
     def __str__(self):
         return str(self.key)
 
@@ -21,8 +21,8 @@ class Node(object):
         return root
 
 class Tree(object):
-    INORDER, PREORDER, POSTORDER = (0,1,2)
-    def __init__(self, root =None, children=[]):
+    INORDER, PREORDER, POSTORDER = (0, 1, 2)
+    def __init__(self, root = None, children = []):
         self.root = root
         if self.root:
             self.root.children = children
@@ -36,8 +36,8 @@ class Tree(object):
             parent.children[-1].parent = parent
 
     def isLeaf(self, node):
-        return not reduce(lambda x,y: x or y, node.children)
-    
+        return not reduce(lambda x, y: x or y, node.children)
+
     def delete(self, node):
         pass
 
@@ -58,7 +58,7 @@ class Tree(object):
         while len(stack):
             current, processed = stack.pop()
             while processed < len(current.children):
-                stack.append((current, processed +1))
+                stack.append((current, processed + 1))
                 for node in self.progress(current.children[processed], Node.LEFT, lambda x: x):
                     yield node
                     stack.append((node, 1))
@@ -71,9 +71,9 @@ class Tree(object):
         while len(stack):
             current, processed = stack.pop()
             while processed < len(current.children):
-                stack.append((current, processed +1))
+                stack.append((current, processed + 1))
                 for node in self.progress(current.children[processed], Node.LEFT, lambda x: x):
-                    stack.append((node, 1)) 
+                    stack.append((node, 1))
 #                print ' '.join(map( lambda x: x[0].__str__(), stack))
                 current, processed = stack.pop()
             else:
@@ -87,18 +87,18 @@ class Tree(object):
         while len(stack):
             current, processed = stack.pop()
             while processed < len(current.children):
-                if processed == len(current.children)/2:
+                if processed == len(current.children) / 2:
                     yield current
-                stack.append((current, processed +1))
+                stack.append((current, processed + 1))
                 for node in self.progress(current.children[processed], Node.LEFT, lambda x: x):
-                    stack.append((node, 1)) 
+                    stack.append((node, 1))
                 current, processed = stack.pop()
 
     def preorder(self, start = None):
         start = start if start else self.root
         for node in self.DepthFS(start):
            yield node
-        
+
     def breadthFS(self, start = None):
         current = start if start else self.root
         q = Queue.Queue()
@@ -121,29 +121,30 @@ class Tree(object):
         elif order == Tree.POSTORDER:
             for node in self.postorder():
                 yield node
-        
+
     def toString(self, order):
             return ' '.join([node.__str__() for node in self.traverse(order)])
-            
+
     def __str__(self):
         return self.toString(Tree.INORDER)
-    
+
     def __len__(self):
         return len([node for node in self.inorder()])
 
 class BSTree(Tree):
-    LEFT, RIGHT, PARENT = 0,1,2
-    def __init__(self, root = None, children=[None, None]):
+    LEFT, RIGHT, PARENT = 0, 1, 2
+    def __init__(self, root = None, children = [None, None]):
         if len(children) != 2 :
             print "Binary trees can not have less or more than children"
             sys.exit()
-        super(BSTree,self).__init__(root, children)
+        super(BSTree, self).__init__(root, children)
 
     def insert(self, node):
+        print node
         if not self.root:
             self.root = node
             return
-        if len(node.children) !=2:
+        if len(node.children) != 2:
             print "Binary trees can not have less or more than children"
             sys.exit()
         current = self.root
@@ -162,7 +163,7 @@ class BSTree(Tree):
                     current.children[Node.LEFT] = node
                     node.parent = current
                     break
-        
+
     def search(self, key):
         current = self.root
         res = []
@@ -186,7 +187,7 @@ class BSTree(Tree):
             for ptr in self.progress(root, Node.LEFT, lambda x: x):
                 current = ptr
             return current
-    
+
     def __largest(self, root):
             current = None
             for ptr in self.progress(root, Node.RIGHT, lambda x: x):
@@ -194,10 +195,10 @@ class BSTree(Tree):
             return current
 
     def isRightChild(self, node):
-        return node == node.parent.children[Node.RIGHT]         
+        return node == node.parent.children[Node.RIGHT]
 
     def isLeftChild(self, node):
-        return node == node.parent.children[Node.LEFT]         
+        return node == node.parent.children[Node.LEFT]
 
     def successor(self, node):
         current = None
@@ -222,7 +223,7 @@ class BSTree(Tree):
     def predecessor(self, node):
         current = None
         if not node:
-            return current 
+            return current
         if node.children[Node.LEFT]: # left child exists, traverse the left subtree
             return self.__largest(node.children[Node.LEFT])
         else:
@@ -242,8 +243,8 @@ class BSTree(Tree):
     def updateParent(self, node, parent):
         for child in filter(lambda x:x, node.children):
             child.parent = parent
-    
-    def delete(self, node): 
+
+    def delete(self, node):
         if self.isLeaf(node):
             if not node.isRoot():
                 node.parent.children[node.parent.children.index(node)] = None
@@ -286,11 +287,11 @@ class BSTree(Tree):
                 else:
                     print "An error happened, no succ or pre and still not a leaf", node
 
-            
+
 class RBTree(BSTree):
     RED, BLACK = 1, 0
     def __init__(self, root, children = [None, None]):
-        root.color = RBTree.BLACK 
+        root.color = RBTree.BLACK
         super(RBTree, self).__init__(root, children)
 
     def insert(self, node):
@@ -306,13 +307,13 @@ class Heap(Tree):
         super(Heap, self).__init__()
         self.nodes = []
     def __parent(self, pos):
-        parent = (pos-1)/2 if (pos-1)/2 != -1 else None
+        parent = (pos - 1) / 2 if (pos - 1) / 2 != -1 else None
         return parent
     def __leftChild(self, pos):
-        left = 2*pos + 1 if 2*pos+1 < len(self.nodes) else None
+        left = 2 * pos + 1 if 2 * pos + 1 < len(self.nodes) else None
         return left
     def __rightChild(self, pos):
-        right = 2*pos + 2 if 2*pos+2 < len(self.nodes) else None
+        right = 2 * pos + 2 if 2 * pos + 2 < len(self.nodes) else None
         return right
     def __updatePtrs(self, pos):
         if pos == None:
@@ -320,18 +321,18 @@ class Heap(Tree):
         left = self.__leftChild(pos)
         right = self.__rightChild(pos)
         parent = self.__parent(pos)
-        if left!= None:
+        if left != None:
             self.nodes[pos].children[BSTree.LEFT] = self.nodes[left]
             self.nodes[left].parent = self.nodes[pos]
         else:
             self.nodes[pos].children[BSTree.LEFT] = None
-            
-        if right!= None:
+
+        if right != None:
             self.nodes[pos].children[BSTree.RIGHT] = self.nodes[right]
             self.nodes[right].parent = self.nodes[pos]
         else:
             self.nodes[pos].children[BSTree.RIGHT] = None
-        
+
         if parent != None:
             self.nodes[pos].parent = self.nodes[parent]
             if self.__leftChild(parent) == pos:
@@ -345,9 +346,9 @@ class Heap(Tree):
         self.nodes[pos], self.nodes[pos2] = self.nodes[pos2], self.nodes[pos]
         self.__updatePtrs(pos)
         self.__updatePtrs(pos2)
-        if pos*pos2 == 0:
+        if pos * pos2 == 0:
             self.root = self.nodes[0]
-        
+
     def __bubbleUp(self):
         pos = len(self.nodes) - 1
         parent = self.__parent(pos)
@@ -356,8 +357,8 @@ class Heap(Tree):
             pos = parent
             parent = self.__parent(pos)
     def __isLeaf(self, pos):
-        return self.__leftChild(pos)== None and self.__rightChild(pos)== None
-    
+        return self.__leftChild(pos) == None and self.__rightChild(pos) == None
+
     def __bubbleDown(self):
         pos = 0
         lastPos = -1
@@ -372,31 +373,31 @@ class Heap(Tree):
                 self.__swap(pos, minPos)
                 pos = minPos
 
-    def insert(self,node):
+    def insert(self, node):
         self.nodes.append(node)
-        self.__updatePtrs(len(self.nodes) -1)
-        self.__updatePtrs(self.__parent(len(self.nodes)-1))
+        self.__updatePtrs(len(self.nodes) - 1)
+        self.__updatePtrs(self.__parent(len(self.nodes) - 1))
         if not self.root:
             self.root = self.nodes[0]
         self.__bubbleUp()
     def __delete(self):
-        end = len(self.nodes)-1
+        end = len(self.nodes) - 1
         del self.nodes[end]
-        if len(self.nodes) ==0:
+        if len(self.nodes) == 0:
             self.root = None
         self.__updatePtrs(self.__parent(end))
-        
+
     def extract_min(self):
         if len(self.nodes) == 0:
             return None
         res = self.nodes[0]
-        self.__swap(0, len(self.nodes)-1)
+        self.__swap(0, len(self.nodes) - 1)
         self.__delete()
         if len(self.nodes):
             self.__bubbleDown()
         return res
     def extract_next(self):
-        return extract_min()
+        return self.extract_min()
     def min(self):
         if not self.empty():
             return self.nodes[0]
@@ -404,19 +405,19 @@ class Heap(Tree):
         return self.min()
     def merge(self, heap2):
         pass
-    
+
 if __name__ == "__main__":
-    a1 = Node(1,[None, None])
-    a2 = Node(2,[None, None])
-    a3 = Node(3,[None, None])
-    a4 = Node(4,[None, None])
-    a5 = Node(5,[None, None])
-    a52 = Node(5,[None, None])
-    a6 = Node(6,[None, None])
-    a7 = Node(7,[None, None])
-    a8 = Node(8,[None, None])
-    a9 = Node(9,[None, None])
-    
+    a1 = Node(1, [None, None])
+    a2 = Node(2, [None, None])
+    a3 = Node(3, [None, None])
+    a4 = Node(4, [None, None])
+    a5 = Node(5, [None, None])
+    a52 = Node(5, [None, None])
+    a6 = Node(6, [None, None])
+    a7 = Node(7, [None, None])
+    a8 = Node(8, [None, None])
+    a9 = Node(9, [None, None])
+
     t = Heap()
     t.insert(a5)
     t.insert(a3)
