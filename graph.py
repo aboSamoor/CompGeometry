@@ -31,6 +31,7 @@ class Tree(object):
     def insert(self, parent, node):
         if not self.root:
             self.root = node
+            self.root.parent = None
         else:
             parent.children.append(node)
             parent.children[-1].parent = parent
@@ -143,6 +144,7 @@ class BSTree(Tree):
         print node
         if not self.root:
             self.root = node
+            self.root.parent = None
             return
         if len(node.children) != 2:
             print "Binary trees can not have less or more than children"
@@ -277,7 +279,7 @@ class BSTree(Tree):
                         pre.children[Node.RIGHT] = node.children[Node.RIGHT]
                         pre.parent.children[pre.parent.children.index(pre)] = pre.children[Node.LEFT]
                         pre.children[Node.LEFT] = node.children[Node.LEFT]
-                        self.updateParent(node, succ)
+                        self.updateParent(node, pre)
                         if node.isRoot():
                             self.root = pre
                             pre.parent = None
@@ -286,6 +288,9 @@ class BSTree(Tree):
                             pre.parent = node.parent
                 else:
                     print "An error happened, no succ or pre and still not a leaf", node
+        node.parent = None
+        for i in range(len(node.children)):
+            node.children[i] = None
 
 
 class RBTree(BSTree):
