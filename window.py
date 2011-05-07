@@ -12,15 +12,15 @@ fps_display = pyglet.clock.ClockDisplay()
 run = False
 mode = "line"
 
-ottman = sweep.sweepCrossingLines()
 
 class Environment():
-    def __init__(self, color = (1.0, 1.0, 1.0, 1.0)):
+    def __init__(self, color = (1.0, 1.0, 1.0, 1.0), size = 1):
         self.points = []
         self.lines = []
         self.polygons = []
         self.lineStart = []
         self.color = color
+        self.size = size
 
     def getCoords(self, items):
         coords = []
@@ -29,6 +29,7 @@ class Environment():
         return coords
 
     def drawVertices(self, pts = []):
+        pyglet.gl.glPointSize(self.size)
         toBeDrawn = self.getCoords(pts) if pts != [] else self.getCoords(self.points)
         pyglet.graphics.draw(len(toBeDrawn) / 2, pyglet.gl.GL_POINTS, ('v2i', toBeDrawn))
 
@@ -60,7 +61,8 @@ class Environment():
         self.drawVertices(self.lineStart)
 
 user = Environment()
-demonstration = Environment((1.0, 0, 0, 1.0))
+demonstration = Environment((1.0, 0, 0, 1.0), 7)
+ottman = sweep.sweepCrossingLines()
 
 def updatePts(points, opX, opY):
     for i in range(0, 2 * (len(points) / 2), 2):
@@ -72,7 +74,7 @@ def on_mouse_press(x, y, button, modifiers):
     if button == pyglet.window.mouse.LEFT:
         if mode == "polygon":
             v = basics.Vertex(x, y)
-            polygons[-1].points.append(v)
+            user.polygons[-1].vertices.append(v)
         elif mode == "vertex":
             v = basics.Vertex(x, y)
             user.points.append(v)
@@ -89,6 +91,7 @@ def on_mouse_press(x, y, button, modifiers):
                 user.lines.append(vector)
                 for e in sweep.Event.lineEvents(user.lines[-1]):
                     ottman.addEvent(e)
+                    print e
                 user.lineStart = []
 @win.event
 def on_key_press(symbol, modifiers):
@@ -106,13 +109,13 @@ def on_key_press(symbol, modifiers):
         if mode == "polygon":
             polygons.append(basics.Polygon())
     if symbol == pyglet.window.key.X:
-        for vertex in ottman.process():
-            print vertex
-            print ottman.EQ
+        for event in ottman.process():
             X, Y = win.get_size()
-            v1 = basics.Vertex(vertex.x, 0)
-            v2 = basics.Vertex(vertex.x, Y)
-            demonstration.lines.append(basics.Vector(v1, v2))
+            v1 = basics.Vertex(event.point.x, 0)
+            v2 = basics.Vertex(event.point.x, Y)
+            demonstration.lines = [basics.Vector(v1, v2)]
+            if event.type == "Cross":
+                demonstration.points.append(event.point)
 
 
 def validVertex(vertex):
@@ -161,5 +164,5 @@ def update(dt):
         X, Y = win.get_size()
         updatePts(vertices, lambda x: (x + 1) % X, lambda x: (x + 1) % Y)
 
-pyglet.clock.schedule(update)
-pyglet.app.run()
+#pyglet.clock.schedule(update)
+#pyglet.app.run()
