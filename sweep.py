@@ -30,25 +30,20 @@ class Event(graph.Node):
         return [s, e]
 
 class startEvent(Event):
-    def __init__(self, line):
-        self.point = line.start
-        super(startEvent, self).__init__([line])
+    def __init__(self, vector):
+        self.point = vector.start
+        super(startEvent, self).__init__([vector])
         self.endEvent = None
         self.slEvents = []
         self.type = "Start"
 
-
-    def process(self, EQ, SL):
+    def process(self, sweep):
         lineEvent = slEvent(self)
-        SL.insert(lineEvent)
-        pre = SL.predecessor(lineEvent)
-        succ = SL.successor(lineEvent)
-        if pre and pre.eqEvent.vectors[0].intersectP(self.vectors[0]):
-            x1 = crossEvent([pre, lineEvent])
-            EQ.insert(x1)
-        if succ and succ.eqEvent.vectors[0].intersectP(self.vectors[0]):
-            x2 = crossEvent([lineEvent, succ])
-            EQ.insert(x2)
+        sweep.SL.insert(lineEvent)
+        pre = sweep.SL.predecessor(lineEvent)
+        succ = sweep.SL.successor(lineEvent)
+        sweep.checkCrossing(pre, lineEvent)
+        sweep.checkCrossing(lineEvent, succ)
 
 class endEvent(Event):
     def __init__(self, line):
@@ -57,15 +52,12 @@ class endEvent(Event):
         self.startEvent = None
         self.type = "End"
 
-    def process(self, EQ, SL):
+    def process(self, sweep):
         line = self.startEvent.slEvents[0]
-        pre = SL.predecessor(line)
-        succ = SL.successor(line)
-        SL.delete(line)
-        if pre and succ:
-            if pre.eqEvent.vectors[0].intersect(succ.eqEvent.vectors[0]):
-                if event.eqEvent.vectors[0].start.x < pre.eqEvent.vectors[0].start.x:
-                    EQ.insert(crossEvent([succ, pre]))
+        pre = sweep.SL.predecessor(line)
+        succ = sweep.SL.successor(line)
+        sweep.SL.delete(line)
+        sweep.checkCrossing(pre, succ)
 
 class crossEvent(Event):
     def __init__(self, slEvents):
@@ -79,23 +71,35 @@ class crossEvent(Event):
         self.endEvent = None
         self.type = "Cross"
 
-    def process(self, EQ, SL):
+    def process(self, sweep):
+        #swap the order of the lines, by taking reversing order of their keys
         keys = [(e.key, e) for e in self.slEvents]
         keys.sort()
         lines = [pair[1] for pair in keys]
         lines.reverse()
-        for i in range(len(lines)):
-            SL.delete(lines[i])
-            lines[i].key = keys[i][0]
-            SL.insert(lines[i])
 
+        #update the lines with the new keys
+        for i in range(len(lines)):
+            sweep.SL.delete(lines[i])
+        for i in range(len(lines)):
+            lines[i].key = keys[i][0]
+            sweep.SL.insert(lines[i])
+        highestLine = lines[-1]
+        succ = sweep.SL.successor(highestLine)
+        lowestLine = lines[0]
+        pre = sweep.SL.predecessor(lowestLine)
+        sweep.checkCrossing(highestLine, succ)
+        sweep.checkCrossing(lowestLine, pre)
 
 
 class slEvent(startEvent):
+    #it should be a start event
     def __init__(self, event):
         super(slEvent, self).__init__(event.vectors[0])
         self.eqEvent = event
         self.key = event.point.y
+        delta = 0.0001
+        self.key += delta * (event.endEvent.point.y - event.point.y)
         self.type = "slEvent"
         event.slEvents.append(self)
 
@@ -115,13 +119,29 @@ class Sweep(object):
 class sweepCrossingLines(Sweep):
     def __init__(self, points = []):
         super(sweepCrossingLines, self).__init__(points)
+        self.linesHistory = {}
+        self.xPointsHistory = {}
 
     def process(self):
         if not self.EQ.empty():
             e = self.next()
-            e.process(self.EQ, self.SL)
+            print e
+            e.process(self)
             self.extract_next()
-            yield e.point
+            yield e
+
+    def checkCrossing(self, line1, line2):
+        if line1 and line2 and (line1, line2) not in self.linesHistory:
+            if line1.eqEvent.vectors[0].intersectP(line2.vectors[0]):
+                x1 = crossEvent([line1, line2])
+                if x1.point not in self.xPointsHistory:
+                    self.EQ.insert(x1)
+                    self.xPointsHistory[x1.point] = x1
+                else:
+                    self.xPointsHistory[x1.point].slEvents.extend([line1, line2])
+                    self.xPointsHistory[x1.point].slEvents = list(set(self.xPointsHistory[x1.point].slEvents))
+            self.linesHistory[(line1, line2)] = True
+            self.linesHistory[(line2, line1)] = True
 
     def addEvent(self, event):
         self.EQ.insert(event)
