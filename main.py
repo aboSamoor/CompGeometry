@@ -32,15 +32,11 @@ def parse_lines_file(fName):
 def parse_polygons_file(fName):
     absName = os.path.abspath(fName)
     lines = open(absName, 'r').read().splitlines()
-    vectors = []
+    vertices = []
     for i in range(0, len(lines)):
-        start = getVertex(lines[i])
-        end = getVertex(lines[(i+1)%len(lines)])
-        if start.x < end.x:
-            vectors.append(basics.Vector(start,end))
-        else:
-            vectors.append(basics.Vector(end,start))
-    return vectors
+        vertices.append(getVertex(lines[i]))
+    poly = basics.Polygon(vertices)
+    return poly.getVectors()
 
 def parse_file(fName):
     base, ext  = os.path.splitext(fName)

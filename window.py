@@ -31,14 +31,15 @@ class Environment():
     def drawVertices(self, pts = []):
         pyglet.gl.glPointSize(self.size)
         toBeDrawn = self.getCoords(pts) if pts != [] else self.getCoords(self.points)
-        pyglet.graphics.draw(len(toBeDrawn) / 2, pyglet.gl.GL_POINTS, ('v2i', toBeDrawn))
+        pyglet.graphics.draw(int(len(toBeDrawn) / 2), pyglet.gl.GL_POINTS, ('v2i', toBeDrawn))
 
     def drawPolygons(self):
         for poly in self.polygons:
-            if len(poly) > 2:
-                pyglet.graphics.draw(len(poly), pyglet.gl.GL_LINE_LOOP, ('v2i', poly))
+            if len(poly.vertices) > 2:
+                coords = poly.coordinates()
+                pyglet.graphics.draw(len(coords)/2, pyglet.gl.GL_LINE_LOOP, ('v2i', coords))
             else:
-                self.drawVertices(poly)
+                self.drawVertices(poly.vertices)
 
     def drawLines(self, segments = []):
         lines = self.getCoords(segments) if segments != [] else self.getCoords(self.lines)
@@ -74,6 +75,8 @@ def on_mouse_press(x, y, button, modifiers):
     if button == pyglet.window.mouse.LEFT:
         if mode == "polygon":
             v = basics.Vertex(x, y)
+            if len(user.polygons) == 0:
+                user.polygons.append(basics.Polygon())
             user.polygons[-1].vertices.append(v)
         elif mode == "vertex":
             v = basics.Vertex(x, y)
@@ -107,7 +110,11 @@ def on_key_press(symbol, modifiers):
         mode = "vertex"
     if symbol == pyglet.window.key.N:
         if mode == "polygon":
-            polygons.append(basics.Polygon())
+            user.polygons.append(basics.Polygon())
+            if len(user.polygons) > 1:
+                for v in user.polygons[-2].getVectors():
+                    for e in sweep.Event.lineEvents(v):
+                        ottman.addEvent(e)
     if symbol == pyglet.window.key.X:
         for event in ottman.process():
             X, Y = win.get_size()
@@ -116,6 +123,8 @@ def on_key_press(symbol, modifiers):
             demonstration.lines = [basics.Vector(v1, v2)]
             if event.type == "Cross":
                 demonstration.points.append(event.point)
+                    
+                
 
 
 def validVertex(vertex):
@@ -150,13 +159,6 @@ def on_draw():
     win.clear()
     user.draw()
     demonstration.draw()
-#    drawVertices(vertices)
-#    drawPolygons(polygons)
-#    drawLines(user.getLinesCoords())
-#    drawLines(demonstration.getLinesCoords())
-#    drawVertices(user.lineStart)
-#    pyglet.graphics.draw_indexed(4, pyglet.gl.GL_TRIANGLES, [0, 1, 2, 0, 2], ('v2i', (100, 100, 150, 100, 150, 150, 100, 150)))
-#    fps_display.draw()
 
 def update(dt):
     if run:
