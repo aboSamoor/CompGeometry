@@ -6,14 +6,23 @@ import sweep
 import basics
 
 win = pyglet.window.Window()
-label = pyglet.text.Label('Rami Eid')
 
 fps_display = pyglet.clock.ClockDisplay()
 run = False
 mode = "line"
 
+author = pyglet.text.Label("Rami Al-Rfou'", font_size = 8, x = 500, y = 10)
+modeP = pyglet.text.Label('mode:Polygon', font_size = 8, x = 0, y = 10)
+modeL = pyglet.text.Label('mode:Lines', font_size = 8, x = 0, y = 10)
+modeV = pyglet.text.Label('mode:Vertices', font_size = 8, x = 0, y = 10)
+modes = {"line":modeL, "polygon":modeP, "vertex":modeV}
+keys = pyglet.text.Label('Mode change: p,v,l', font_size = 8, x = 100, y = 10)
+finish = pyglet.text.Label('finish Polygon: n', font_size = 8, x = 225, y = 10)
+processing = pyglet.text.Label('Process: x', font_size = 8, x = 350, y = 10)
+
 
 class Environment():
+
     def __init__(self, color = (1.0, 1.0, 1.0, 1.0), size = 1):
         self.points = []
         self.lines = []
@@ -21,12 +30,20 @@ class Environment():
         self.lineStart = []
         self.color = color
         self.size = size
+        self.labels = [author, keys, processing]
 
     def getCoords(self, items):
         coords = []
         for item in items:
             coords.extend([int(v) for v in item.coordinates()])
         return coords
+
+    def drawLabels(self):
+        for l in self.labels:
+            l.draw()
+        modes[mode].draw()
+        if mode == "polygon":
+            finish.draw()
 
     def drawVertices(self, pts = []):
         pyglet.gl.glPointSize(self.size)
@@ -37,7 +54,7 @@ class Environment():
         for poly in self.polygons:
             if len(poly.vertices) > 2:
                 coords = poly.coordinates()
-                pyglet.graphics.draw(len(coords)/2, pyglet.gl.GL_LINE_LOOP, ('v2i', coords))
+                pyglet.graphics.draw(len(coords) / 2, pyglet.gl.GL_LINE_LOOP, ('v2i', coords))
             else:
                 self.drawVertices(poly.vertices)
 
@@ -60,6 +77,7 @@ class Environment():
         self.drawPolygons()
         self.drawLines(self.lines)
         self.drawVertices(self.lineStart)
+        self.drawLabels()
 
 user = Environment()
 demonstration = Environment((1.0, 0, 0, 1.0), 7)
@@ -123,8 +141,8 @@ def on_key_press(symbol, modifiers):
             demonstration.lines = [basics.Vector(v1, v2)]
             if event.type == "Cross":
                 demonstration.points.append(event.point)
-                    
-                
+
+
 
 
 def validVertex(vertex):
