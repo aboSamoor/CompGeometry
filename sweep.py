@@ -23,8 +23,18 @@ class Event(graph.Node):
 
     @staticmethod
     def lineEvents(vector):
-        s = startEvent(vector)
-        e = endEvent(vector)
+        tmp = vector
+        if vector.start.x > vector.end.x:
+            tmp = basics.Vector(vector.end, vector.start)
+        if vector.start.x == vector.end.x:
+            if vector.end.y < vector.start.y:
+                tmp = basics.Vector(vector.end, vector.start)
+        s = startEvent(tmp)
+        e = endEvent(tmp)
+        if s.point.x == e.point.x:
+            delta = 0.0001
+            s.key -= delta
+            e.key += delta
         s.endEvent = e
         e.startEvent = s
         return [s, e]
@@ -56,7 +66,10 @@ class endEvent(Event):
         line = self.startEvent.slEvents[0]
         pre = sweep.SL.predecessor(line)
         succ = sweep.SL.successor(line)
-        sweep.SL.delete(line)
+        try:
+            sweep.SL.delete(line)
+        except:
+            print "line not found"
         sweep.checkCrossing(pre, succ)
 
 class crossEvent(Event):
@@ -73,6 +86,7 @@ class crossEvent(Event):
 
     def process(self, sweep):
         #swap the order of the lines, by taking reversing order of their keys
+        self.slEvents = list(set(self.slEvents))
         keys = [(e.key, e) for e in self.slEvents]
         keys.sort()
         lines = [pair[1] for pair in keys]
@@ -80,7 +94,10 @@ class crossEvent(Event):
 
         #update the lines with the new keys
         for i in range(len(lines)):
-            sweep.SL.delete(lines[i])
+            try:
+                sweep.SL.delete(lines[i])
+            except:
+                print "line not found"
         for i in range(len(lines)):
             lines[i].key = keys[i][0]
             sweep.SL.insert(lines[i])
@@ -98,8 +115,12 @@ class slEvent(startEvent):
         super(slEvent, self).__init__(event.vectors[0])
         self.eqEvent = event
         self.key = event.point.y
-        delta = 0.0001
-        self.key += delta * (event.endEvent.point.y - event.point.y)
+        delta = 0.000001
+        dy = (event.endEvent.point.y - event.point.y)
+        tmp = dy
+        if event.endEvent.point.x != event.point.x:
+            tmp = dy / event.endEvent.point.x - event.point.x
+        self.key += tmp * delta
         self.type = "slEvent"
         event.slEvents.append(self)
 

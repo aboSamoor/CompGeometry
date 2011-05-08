@@ -216,7 +216,7 @@ class BSTree(Tree):
             #otherwise, traverse up till you find a parent with right subtree
             for ptr in self.progress(node, Node.PARENT, lambda x : x.parent and self.isRightChild(x)):
                 current = ptr
-            if current.parent:
+            if current and current.parent:
                 if current.parent.parent and self.isLeftChild(current.parent):
                     return current.parent.parent
             # we found that parent with right child

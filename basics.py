@@ -111,19 +111,19 @@ class Polygon:
         for v in self.vertices:
             res.extend(v.coordinates())
         return res
-    
+
     def getVectors(self):
         vectors = []
         for i in range(0, len(self.vertices)):
             start = self.vertices[i]
-            end = self.vertices[(i+1)%len(self.vertices)] 
+            end = self.vertices[(i + 1) % len(self.vertices)]
             if start.x < end.x:
-                vectors.append(Vector(start,end))
+                vectors.append(Vector(start, end))
             else:
-                vectors.append(Vector(end,start))
+                vectors.append(Vector(end, start))
         return vectors
-    
-    
+
+
     def isSimple(self):
         pass
     def isConvex(self):
