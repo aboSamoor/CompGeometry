@@ -1,0 +1,53 @@
+1- REQUIREMENTS
+2- DOWNLOAD
+3- RUNNING
+4- Limitations
+
+
+1- REQUIREMENTS
+====================
+The program depends on pyglet, so you have to install it. I used the packaged one for Ubuntu 10.10 
+$sudo apt-get install python-pyglet
+
+Python is cross platform, however, I did not test the code on other platform than linux.
+
+2- DOWNLOAD
+====================
+To download the program try to copy paste the below link to your browser
+https://github.com/aboSamoor/CompGeometry/zipball/master
+
+It is preferred to clone or checkout the git branch
+$ git clone git://github.com/aboSamoor/CompGeometry.git
+
+
+3- RUNNING
+====================
+$python main.py
+
+This will launch a new window, where you can draw the polygons, lines, vertices you like. To start the algorithm you have to press 'x'. This will progress the sweepin algorithm
+one event per key. It is advised not to modify the polygons or add lines once you start the algorithm.
+
+If you already have a polygon or bunch of lines expressed in a file, then you can initialize the window with that drawing by passing the name of the file after the 'f' flag
+$python main.py -f fileName
+
+If the file extension is .p the file will be interpreted as polygon making a line between every two consectuitive vertices. If the file extension is .l the file will be
+interpreted as a sequence of line that are defined by pairs of vertices.
+
+Example:
+
+Polygon.p: which is a triangle
+0,0
+50,50
+25,75
+
+Polygon.l: the same triangle expressed as sequence of lines
+0,0
+50,50
+50,50
+25,75
+0,0
+25,75
+
+4- Limitations
+====================
+Due to the limited time, the software does not handle vertical lines.
