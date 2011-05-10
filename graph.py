@@ -255,14 +255,15 @@ class BSTree(Tree):
             succ = self.successor(node)
             if succ and succ != node.parent:
                     if succ.isRoot():
-                        succ.children[Node.LEFT] = node.children[Node.LEFT]
-                        self.updateParent(node, succ)
+                        node.parent.children[node.parent.children.index(node)] = node.children[Node.LEFT]
+                        self.updateParent(node, node.parent)
                     else:
                         succ.children[Node.LEFT] = node.children[Node.LEFT]
-                        succ.parent.children[succ.parent.children.index(succ)] = succ.children[Node.RIGHT]
-                        if succ.children[Node.RIGHT]:
-                            succ.children[Node.RIGHT].parent = succ.parent
-                        succ.children[Node.RIGHT] = node.children[Node.RIGHT]
+                        if succ.parent != node:
+                            succ.parent.children[succ.parent.children.index(succ)] = succ.children[Node.RIGHT]
+                            if succ.children[Node.RIGHT]:
+                                succ.children[Node.RIGHT].parent = succ.parent
+                            succ.children[Node.RIGHT] = node.children[Node.RIGHT]
                         self.updateParent(node, succ)
                         if node.isRoot():
                             self.root = succ
@@ -274,14 +275,15 @@ class BSTree(Tree):
                 pre = self.predecessor(node)
                 if pre:
                     if pre.isRoot():
-                        pre.children[Node.RIGHT] = node.children[Node.RIGHT]
-                        self.updateParent(node, pre)
+                        node.parent.children[node.parent.children.index(node)] = node.children[Node.RIGHT]
+                        self.updateParent(node, node.parent)
                     else:
                         pre.children[Node.RIGHT] = node.children[Node.RIGHT]
-                        pre.parent.children[pre.parent.children.index(pre)] = pre.children[Node.LEFT]
-                        if pre.children[Node.LEFT]:
-                            pre.children[Node.LEFT].parent = pre.parent
-                        pre.children[Node.LEFT] = node.children[Node.LEFT]
+                        if pre.parent != node:
+                            pre.parent.children[pre.parent.children.index(pre)] = pre.children[Node.LEFT]
+                            if pre.children[Node.LEFT]:
+                                pre.children[Node.LEFT].parent = pre.parent
+                            pre.children[Node.LEFT] = node.children[Node.LEFT]
                         self.updateParent(node, pre)
                         if node.isRoot():
                             self.root = pre
@@ -290,7 +292,8 @@ class BSTree(Tree):
                             node.parent.children[node.parent.children.index(node)] = pre
                             pre.parent = node.parent
                 else:
-                    print "An error happened, no succ or pre and still not a leaf", node
+#                    print "An error happened, no succ or pre and still not a leaf", node
+                    print node, 33
         node.parent = None
         for i in range(len(node.children)):
             node.children[i] = None
@@ -416,24 +419,37 @@ if __name__ == "__main__":
     nodes = []
     import random
     tree = BSTree()
-    size = 50
+    size = 10
     for i in range(size):
         nodes.append(Node(i, [None, None]))
     indexes = range(size)
+    prepared = False
+    if prepared:
 #    scenario0 = [5, 20, 4, 19, 2, 12, 9, 23, 16, 24, 3, 11, 1, 22, 10, 13, 14, 0, 7, 15, 21, 6, 17, 8, 18]
-#    for i in scenario0:
-#        tree.insert(nodes[i])
+#    scenario1 = [6, 2, 1, 5, 8, 0, 7, 3, 9, 4]
+#    scenario2 = [ 0, 7, 1, 8, 9, 5, 4, 3, 6, 2]
+        scenario = [8, 2, 6, 5, 3, 9, 7, 4, 1, 0]
+        elements = [0, 1, 3, 8, 7, 8, 6]
+        for i in scenario:
+            tree.insert(nodes[i])
+    else:
+        for i in range(len(nodes)):
+            nextIndex = random.randrange(0, len(indexes))
+            next = indexes[nextIndex]
+            print next
+            tree.insert(nodes[next])
+            del indexes[nextIndex]
+
     for i in range(len(nodes)):
-        nextIndex = random.randrange(0, len(indexes))
-        next = indexes[nextIndex]
-        print next
-        tree.insert(nodes[next])
-        del indexes[nextIndex]
-    for i in range(len(nodes)):
-        print "delete", i
-        tree.delete(nodes[i])
+        if not prepared:
+            index = random.randrange(0, len(nodes))
+        else:
+            index = elements[i]
+        print i, "delete node", index
+        if i == 2:
+            print "hi"
+        tree.delete(nodes[index])
         print tree
-        tree.insert(nodes[i])
+        tree.insert(nodes[index])
         print tree
         print
-
