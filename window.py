@@ -19,6 +19,7 @@ modes = {"line":modeL, "polygon":modeP, "vertex":modeV}
 keys = pyglet.text.Label('Mode change: p,v,l', font_size = 8, x = 100, y = 10)
 finish = pyglet.text.Label('finish Polygon: n', font_size = 8, x = 225, y = 10)
 processing = pyglet.text.Label('Process: x', font_size = 8, x = 350, y = 10)
+clear = pyglet.text.Label('Clear: c', font_size = 8, x = 425, y = 10)
 
 
 class Environment():
@@ -30,7 +31,7 @@ class Environment():
         self.lineStart = []
         self.color = color
         self.size = size
-        self.labels = [author, keys, processing]
+        self.labels = [author, keys, processing, clear]
 
     def getCoords(self, items):
         coords = []
@@ -117,7 +118,7 @@ def on_mouse_press(x, y, button, modifiers):
 @win.event
 def on_key_press(symbol, modifiers):
     global run
-    global mode, polygons, vertices, vectors
+    global mode, user, demonstration, ottman
     if symbol == pyglet.window.key.S:
         run = not run
     if symbol == pyglet.window.key.L:
@@ -141,6 +142,10 @@ def on_key_press(symbol, modifiers):
             demonstration.lines = [basics.Vector(v1, v2)]
             if event.type == "Cross":
                 demonstration.points.append(event.point)
+    if symbol == pyglet.window.key.C:
+        user = Environment()
+        demonstration = Environment((1.0, 0, 0, 1.0), 7)
+        ottman = sweep.sweepCrossingLines()
 
 
 
