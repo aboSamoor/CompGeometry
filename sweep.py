@@ -66,10 +66,7 @@ class endEvent(Event):
         line = self.startEvent.slEvents[0]
         pre = sweep.SL.predecessor(line)
         succ = sweep.SL.successor(line)
-        try:
-            sweep.SL.delete(line)
-        except:
-            print "line not found"
+        sweep.SL.delete(line)
         sweep.checkCrossing(pre, succ)
 
 class crossEvent(Event):
@@ -94,10 +91,7 @@ class crossEvent(Event):
 
         #update the lines with the new keys
         for i in range(len(lines)):
-            try:
-                sweep.SL.delete(lines[i])
-            except:
-                print "line not found"
+            sweep.SL.delete(lines[i])
         for i in range(len(lines)):
             lines[i].key = keys[i][0]
             sweep.SL.insert(lines[i])
