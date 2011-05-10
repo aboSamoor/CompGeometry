@@ -141,7 +141,6 @@ class BSTree(Tree):
         super(BSTree, self).__init__(root, children)
 
     def insert(self, node):
-        print node
         if not self.root:
             self.root = node
             self.root.parent = None
@@ -254,13 +253,15 @@ class BSTree(Tree):
                 self.root = None
         else:
             succ = self.successor(node)
-            if succ:
+            if succ and succ != node.parent:
                     if succ.isRoot():
                         succ.children[Node.LEFT] = node.children[Node.LEFT]
                         self.updateParent(node, succ)
                     else:
                         succ.children[Node.LEFT] = node.children[Node.LEFT]
                         succ.parent.children[succ.parent.children.index(succ)] = succ.children[Node.RIGHT]
+                        if succ.children[Node.RIGHT]:
+                            succ.children[Node.RIGHT].parent = succ.parent
                         succ.children[Node.RIGHT] = node.children[Node.RIGHT]
                         self.updateParent(node, succ)
                         if node.isRoot():
@@ -278,6 +279,8 @@ class BSTree(Tree):
                     else:
                         pre.children[Node.RIGHT] = node.children[Node.RIGHT]
                         pre.parent.children[pre.parent.children.index(pre)] = pre.children[Node.LEFT]
+                        if pre.children[Node.LEFT]:
+                            pre.children[Node.LEFT].parent = pre.parent
                         pre.children[Node.LEFT] = node.children[Node.LEFT]
                         self.updateParent(node, pre)
                         if node.isRoot():
@@ -304,8 +307,6 @@ class RBTree(BSTree):
 
     def delete(self, node):
         pass
-
-
 
 class Heap(Tree):
     def __init__(self):
@@ -412,39 +413,27 @@ class Heap(Tree):
         pass
 
 if __name__ == "__main__":
-    a1 = Node(1, [None, None])
-    a2 = Node(2, [None, None])
-    a3 = Node(3, [None, None])
-    a4 = Node(4, [None, None])
-    a5 = Node(5, [None, None])
-    a52 = Node(5, [None, None])
-    a6 = Node(6, [None, None])
-    a7 = Node(7, [None, None])
-    a8 = Node(8, [None, None])
-    a9 = Node(9, [None, None])
+    nodes = []
+    import random
+    tree = BSTree()
+    size = 50
+    for i in range(size):
+        nodes.append(Node(i, [None, None]))
+    indexes = range(size)
+#    scenario0 = [5, 20, 4, 19, 2, 12, 9, 23, 16, 24, 3, 11, 1, 22, 10, 13, 14, 0, 7, 15, 21, 6, 17, 8, 18]
+#    for i in scenario0:
+#        tree.insert(nodes[i])
+    for i in range(len(nodes)):
+        nextIndex = random.randrange(0, len(indexes))
+        next = indexes[nextIndex]
+        print next
+        tree.insert(nodes[next])
+        del indexes[nextIndex]
+    for i in range(len(nodes)):
+        print "delete", i
+        tree.delete(nodes[i])
+        print tree
+        tree.insert(nodes[i])
+        print tree
+        print
 
-    t = Heap()
-    t.insert(a5)
-    t.insert(a3)
-    t.insert(a2)
-    t.insert(a4)
-    t.insert(a8)
-    t.insert(a7)
-    t.insert(a9)
-#    pdb.set_trace()
-#    print t
-    print t
-    print t.extract_min()
-    print t
-    print t.extract_min()
-    print t
-    print t.extract_min()
-    print t
-    print t.extract_min()
-    print t
-    print t.extract_min()
-    print t
-    print t.extract_min()
-    print t
-    print t.extract_min()
-    print t
