@@ -66,7 +66,10 @@ class endEvent(Event):
         line = self.startEvent.slEvents[0]
         pre = sweep.SL.predecessor(line)
         succ = sweep.SL.successor(line)
-        sweep.SL.delete(line)
+        try:
+            sweep.SL.delete(line)
+        except:
+            print line, 333
         sweep.checkCrossing(pre, succ)
 
 class crossEvent(Event):
@@ -91,7 +94,10 @@ class crossEvent(Event):
 
         #update the lines with the new keys
         for i in range(len(lines)):
-            sweep.SL.delete(lines[i])
+            try:
+                sweep.SL.delete(lines[i])
+            except:
+                print lines[i], 333
         for i in range(len(lines)):
             lines[i].key = keys[i][0]
             sweep.SL.insert(lines[i])
@@ -163,7 +169,3 @@ class sweepCrossingLines(Sweep):
 
 if __name__ == "__main__":
         print "hi"
-
-
-#TODO:
-# 1- remove redundant crossing points !
