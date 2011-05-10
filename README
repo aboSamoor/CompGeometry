@@ -48,6 +48,10 @@ Polygon.l: the same triangle expressed as sequence of lines
 0,0
 25,75
 
+You can generate random polygons using the script provided:
+$randomPolygonGenerator.py sizeOfyourPolygon
+
 4- Limitations
 ====================
-Due to the limited time, the software does not handle vertical lines.
+
+The program do not quit once it discovers the first crossing, however, this can be add easily. More testing should be done, so bug reports are welcome.
